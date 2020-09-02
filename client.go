@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"gitlab.com/NebulousLabs/Sia/types"
+	"go.uber.org/multierr"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/hostdb"
 	"lukechampine.com/us/renter"
@@ -23,7 +24,7 @@ type Client struct {
 	addr string
 }
 
-func (c *Client) req(method string, route string, data, resp interface{}) error {
+func (c *Client) req(method string, route string, data, resp interface{}) (err error) {
 	var body io.Reader
 	if data != nil {
 		js, _ := json.Marshal(data)
@@ -31,15 +32,21 @@ func (c *Client) req(method string, route string, data, resp interface{}) error 
 	}
 	req, err := http.NewRequest(method, fmt.Sprintf("%v%v", c.addr, route), body)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	r, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
-	defer r.Body.Close()
-	defer io.Copy(ioutil.Discard, r.Body)
+	defer func() {
+		if e := r.Body.Close(); e != nil {
+			err = multierr.Append(err, e)
+		}
+		if _, e := io.Copy(ioutil.Discard, r.Body); e != nil {
+			err = multierr.Append(err, e)
+		}
+	}()
 	if r.StatusCode != 200 {
 		err, _ := ioutil.ReadAll(r.Body)
 		return errors.New(strings.TrimSpace(string(err)))
