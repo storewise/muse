@@ -82,7 +82,7 @@ func (c *Client) Scan(host hostdb.HostPublicKey) (settings hostdb.HostSettings, 
 // Form forms a contract with a host. The settings should be obtained from a
 // recent call to Scan. If the settings have changed in the interim, the host
 // may reject the contract.
-func (c *Client) Form(host hostdb.ScannedHost, funds types.Currency, start, end types.BlockHeight) (contract Contract, err error) {
+func (c *Client) Form(host *hostdb.ScannedHost, funds types.Currency, start, end types.BlockHeight) (contract Contract, err error) {
 	err = c.post("/form", RequestForm{
 		HostKey:     host.PublicKey,
 		Funds:       funds,
@@ -97,7 +97,7 @@ func (c *Client) Form(host hostdb.ScannedHost, funds types.Currency, start, end 
 // contract previously formed by the server. The settings should be obtained
 // from a recent call to Scan. If the settings have changed in the interim, the
 // host may reject the contract.
-func (c *Client) Renew(host hostdb.ScannedHost, old renter.Contract, funds types.Currency, start, end types.BlockHeight) (contract Contract, err error) {
+func (c *Client) Renew(host *hostdb.ScannedHost, old *renter.Contract, funds types.Currency, start, end types.BlockHeight) (contract Contract, err error) {
 	err = c.post("/renew", RequestRenew{
 		ID:          old.ID,
 		Funds:       funds,
