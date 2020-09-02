@@ -43,9 +43,6 @@ func (c *Client) req(method string, route string, data, resp interface{}) (err e
 		if e := r.Body.Close(); e != nil {
 			err = multierr.Append(err, e)
 		}
-		if _, e := io.Copy(ioutil.Discard, r.Body); e != nil {
-			err = multierr.Append(err, e)
-		}
 	}()
 	if r.StatusCode != 200 {
 		err, _ := ioutil.ReadAll(r.Body)
