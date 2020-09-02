@@ -179,6 +179,23 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	if rf.HostKey == "" || rf.RenterKey == nil {
+		var old Contract
+		s.mu.Lock()
+		for _, old = range s.contracts {
+			if old.ID == rf.ID {
+				break
+			}
+		}
+		s.mu.Unlock()
+		if old.ID != rf.ID {
+			http.Error(w, "no record of that contract", http.StatusBadRequest)
+			return
+		}
+		rf.HostKey = old.HostKey
+		rf.RenterKey = old.RenterKey
+	}
+
 	hostAddr, err := s.shard.ResolveHostKey(rf.HostKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

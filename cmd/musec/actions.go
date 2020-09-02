@@ -37,7 +37,10 @@ func form(museAddr, hostPrefix string, funds types.Currency, endStr string) erro
 	if err != nil {
 		return err
 	}
-	c, err := mc.Form(hostKey, funds, start, end, settings)
+	c, err := mc.Form(&hostdb.ScannedHost{
+		HostSettings: settings,
+		PublicKey:    hostKey,
+	}, funds, start, end)
 	if err != nil {
 		return err
 	}
@@ -67,22 +70,25 @@ func renew(museAddr, id string, funds types.Currency, endStr string) error {
 	if err != nil {
 		return err
 	}
-	var hostKey hostdb.HostPublicKey
+	var old muse.Contract
 	for _, c := range contracts {
 		if c.ID == fcid {
-			hostKey = c.HostKey
+			old = c
 			break
 		}
 	}
-	if hostKey == "" {
+	if old.HostKey == "" {
 		return errors.New("no record of that contract")
 	}
 
-	settings, err := mc.Scan(hostKey)
+	settings, err := mc.Scan(old.HostKey)
 	if err != nil {
 		return err
 	}
-	rc, err := mc.Renew(fcid, funds, start, end, settings)
+	rc, err := mc.Renew(&hostdb.ScannedHost{
+		HostSettings: settings,
+		PublicKey:    old.HostKey,
+	}, &old.Contract, funds, start, end)
 	if err != nil {
 		return err
 	}
