@@ -55,6 +55,8 @@ type RequestRenew struct {
 	StartHeight types.BlockHeight
 	EndHeight   types.BlockHeight
 	Settings    hostdb.HostSettings
+	HostKey     hostdb.HostPublicKey
+	RenterKey   ed25519.PrivateKey
 }
 
 // RequestScan is the request type for the /scan endpoint.

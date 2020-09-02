@@ -15,6 +15,7 @@ import (
 	"gitlab.com/NebulousLabs/Sia/types"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/hostdb"
+	"lukechampine.com/us/renter"
 )
 
 // A Client communicates with a muse server.
@@ -81,13 +82,13 @@ func (c *Client) Scan(host hostdb.HostPublicKey) (settings hostdb.HostSettings, 
 // Form forms a contract with a host. The settings should be obtained from a
 // recent call to Scan. If the settings have changed in the interim, the host
 // may reject the contract.
-func (c *Client) Form(host hostdb.HostPublicKey, funds types.Currency, start, end types.BlockHeight, settings hostdb.HostSettings) (contract Contract, err error) {
+func (c *Client) Form(host hostdb.ScannedHost, funds types.Currency, start, end types.BlockHeight) (contract Contract, err error) {
 	err = c.post("/form", RequestForm{
-		HostKey:     host,
+		HostKey:     host.PublicKey,
 		Funds:       funds,
 		StartHeight: start,
 		EndHeight:   end,
-		Settings:    settings,
+		Settings:    host.HostSettings,
 	}, &contract)
 	return
 }
@@ -96,13 +97,15 @@ func (c *Client) Form(host hostdb.HostPublicKey, funds types.Currency, start, en
 // contract previously formed by the server. The settings should be obtained
 // from a recent call to Scan. If the settings have changed in the interim, the
 // host may reject the contract.
-func (c *Client) Renew(id types.FileContractID, funds types.Currency, start, end types.BlockHeight, settings hostdb.HostSettings) (contract Contract, err error) {
+func (c *Client) Renew(host hostdb.ScannedHost, old renter.Contract, funds types.Currency, start, end types.BlockHeight) (contract Contract, err error) {
 	err = c.post("/renew", RequestRenew{
-		ID:          id,
+		ID:          old.ID,
 		Funds:       funds,
 		StartHeight: start,
 		EndHeight:   end,
-		Settings:    settings,
+		Settings:    host.HostSettings,
+		HostKey:     host.PublicKey,
+		RenterKey:   old.RenterKey,
 	}, &contract)
 	return
 }
