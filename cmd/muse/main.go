@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/gorilla/handlers"
 	"gitlab.com/NebulousLabs/Sia/build"
 	"gitlab.com/NebulousLabs/Sia/modules"
 	"gitlab.com/NebulousLabs/Sia/modules/consensus"
@@ -99,7 +100,7 @@ func main() {
 	}
 
 	log.Printf("Listening on %v...", *apiAddr)
-	log.Fatal(http.ListenAndServe(*apiAddr, srv))
+	log.Fatal(http.ListenAndServe(*apiAddr, handlers.LoggingHandler(os.Stderr, handlers.CompressHandler(srv))))
 }
 
 // global vars to make it easier to compose createShardServer and createWalletServer
@@ -134,7 +135,7 @@ func createShardServer(addr, dir string) (err error) {
 	if err != nil {
 		return err
 	}
-	go http.Serve(l, shard.NewServer(r))
+	go http.Serve(l, handlers.LoggingHandler(os.Stderr, handlers.CompressHandler(shard.NewServer(r))))
 	return nil
 }
 
@@ -169,7 +170,7 @@ func createWalletServer(addr, dir string) (err error) {
 	if err != nil {
 		return err
 	}
-	go http.Serve(l, walrus.NewServer(w, tp))
+	go http.Serve(l, handlers.LoggingHandler(os.Stderr, handlers.CompressHandler(walrus.NewServer(w, tp))))
 	return nil
 }
 
