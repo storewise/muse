@@ -50,7 +50,7 @@ func getSeed() wallet.Seed {
 }
 
 func main() {
-	log.SetFlags(0)
+	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 	apiAddr := flag.String("a", ":9580", "host:port that the API server listens on")
 	walrusAddr := flag.String("w", "localhost:9380", "host:port of the walrus server")
 	serveWalrus := flag.Bool("serve-walrus", false, "run a walrus server (on the addr given by -w)")

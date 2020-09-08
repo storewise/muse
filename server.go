@@ -116,6 +116,8 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	start := time.Now()
+	log.Println("resolving a host key:", rf.HostKey)
 	hostAddr, err := s.shard.ResolveHostKey(rf.HostKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -127,9 +129,12 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 		PublicKey:    rf.HostKey,
 	}
 	key := ed25519.NewKeyFromSeed(frand.Bytes(32))
+	log.Println("trying to lock utxoMu:", rf.HostKey, time.Since(start))
 	s.utxoMu.Lock()
+	log.Println("forming a contract:", rf.HostKey, time.Since(start))
 	rev, txnSet, err := proto.FormContract(s.wallet, s.tpool, key, host, rf.Funds, rf.StartHeight, rf.EndHeight)
 	if err != nil {
+		log.Println("release utxoMu:", rf.HostKey, time.Since(start))
 		s.utxoMu.Unlock()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -143,7 +148,9 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 	// tpool without error, and intend to honor the contract. Our tpool
 	// *shouldn't* reject the transaction, but it might if we desync from
 	// the network somehow.
+	log.Println("submitting transaction set:", rf.HostKey, time.Since(start))
 	submitErr := s.tpool.AcceptTransactionSet(txnSet)
+	log.Println("release utxoMu:", rf.HostKey, time.Since(start))
 	s.utxoMu.Unlock()
 	if submitErr != nil && submitErr != modules.ErrDuplicateTransactionSet {
 		log.Println("WARN: contract transaction was not accepted", submitErr)
@@ -158,6 +165,7 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 		HostAddress: host.NetAddress,
 		EndHeight:   rf.EndHeight,
 	}
+	log.Println("storing a contract:", rf.HostKey, time.Since(start))
 	s.mu.Lock()
 	s.contracts = append(s.contracts, c)
 	s.mu.Unlock()
@@ -167,6 +175,7 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	writeJSON(w, c)
+	log.Println("forming a contract finishes:", rf.HostKey, time.Since(start))
 }
 
 func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
@@ -196,6 +205,8 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 		rf.RenterKey = old.RenterKey
 	}
 
+	start := time.Now()
+	log.Println("resolving a host key:", rf.HostKey)
 	hostAddr, err := s.shard.ResolveHostKey(rf.HostKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -206,15 +217,19 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 		PublicKey:    rf.HostKey,
 		HostSettings: rf.Settings,
 	}
+	log.Println("trying to lock utxoMu:", rf.HostKey, time.Since(start))
 	s.utxoMu.Lock()
+	log.Println("renewing a contract:", rf.HostKey, time.Since(start))
 	rev, txnSet, err := proto.RenewContract(s.wallet, s.tpool, rf.ID, rf.RenterKey, host, rf.Funds, rf.StartHeight, rf.EndHeight)
 	if err != nil {
+		log.Println("release utxoMu:", rf.HostKey, time.Since(start))
 		s.utxoMu.Unlock()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// submit txnSet to tpool (see handleForm)
+	log.Println("submitting transaction set:", rf.HostKey, time.Since(start))
 	submitErr := s.tpool.AcceptTransactionSet(txnSet)
 	s.utxoMu.Unlock()
 	if submitErr != nil && submitErr != modules.ErrDuplicateTransactionSet {
@@ -230,6 +245,7 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 		HostAddress: rf.Settings.NetAddress,
 		EndHeight:   rf.EndHeight,
 	}
+	log.Println("storing a contract:", rf.HostKey, time.Since(start))
 	s.mu.Lock()
 	s.contracts = append(s.contracts, c)
 	s.mu.Unlock()
@@ -239,6 +255,7 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	writeJSON(w, c)
+	log.Println("renewing a contract finishes:", rf.HostKey, time.Since(start))
 }
 
 func (s *server) handleHostSets(w http.ResponseWriter, req *http.Request) {
