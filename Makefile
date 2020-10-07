@@ -1,13 +1,17 @@
-ldflags = -X 'main.githash=`git rev-parse --short HEAD`' \
-          -X 'main.builddate=`date`'
+LD_FLAGS := -X 'main.githash=`git rev-parse --short HEAD`' \
+           -X 'main.builddate=`date`'
+IMAGE := ghcr.io/storewise/muse/muse
+TAG := $(shell date '+%Y%m%d%H%M')
+bold := $(shell tput bold)
+sgr0 := $(shell tput sgr0)
 
 # all builds a binary with the current commit hash
-all:
-	go install -ldflags "$(ldflags)" ./cmd/...
+all: bin/muse bin/musec
+	@
 
 # dev builds a binary with dev constants
 dev:
-	go install -ldflags "$(ldflags)" -tags='dev' ./cmd/...
+	go install -ldflags "$(LD_FLAGS)" -tags='dev' ./cmd/...
 
 test:
 	go test -short ./...
@@ -20,19 +24,18 @@ bench:
 
 lint:
 	@golint ./...
-	@golangci-lint run \
-		--enable-all \
-		--disable=lll \
-		--disable=gocyclo \
-		--disable=prealloc \
-		--disable=interfacer \
-		--disable=unparam \
-		--disable=gocritic \
-		--disable=dupl \
-		--disable=errcheck \
-		--disable=gochecknoglobals \
-		--disable=funlen \
-		--skip-dirs=internal \
-		./...
+	@golangci-lint run ./...
 
-.PHONY: all dev test test-long bench lint
+bin/muse bin/musec:
+	@echo "$(bold)Building binaries$(sgr0)"
+	@mkdir -p bin
+	GOARCH=amd64 GOOS=linux go build -ldflags "$(LD_FLAGS)" -o bin ./cmd/...
+
+build: bin/muse bin/musec
+	@echo "$(bold)Building a Docker image$(sgr0)"
+	docker build -t $(IMAGE):$(TAG) -f build/Dockerfile .
+
+clean:
+	@rm -rf bin/*
+
+.PHONY: all dev test test-long bench lint build clean
