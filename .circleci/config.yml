@@ -1,0 +1,48 @@
+version: 2.1
+orbs:
+  go: circleci/go@1.4.0
+  docker: circleci/docker@1.4.0
+jobs:
+  build:
+    executor:
+      name: go/default
+      tag: "1.15"
+    steps:
+      - checkout
+      - go/mod-download-cached
+      - run:
+          name: Build
+          command: make
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bin/*
+workflows:
+  build:
+    jobs:
+      - build:
+          context: reviewdog
+          filters:
+            tags:
+              only: /^v.*/
+      - docker/hadolint:
+          ignore-rules: "DL3008"
+          dockerfiles: build/Dockerfile
+      - docker/publish:
+          context: github-package-registry
+          image: storewise/muse/muse
+          dockerfile: build/Dockerfile
+          registry: ghcr.io
+          docker-username: GITHUB_USERNAME
+          docker-password: GITHUB_ACCESS_TOKEN
+          tag: $CIRCLE_TAG
+          before_build:
+            - attach_workspace:
+                at: .
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
