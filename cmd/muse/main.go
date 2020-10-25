@@ -57,6 +57,7 @@ func main() {
 	shardAddr := flag.String("s", "localhost:9480", "host:port of the shard server")
 	serveShard := flag.Bool("serve-shard", false, "run a shard server (on the addr given by -s)")
 	dir := flag.String("d", ".", "directory where server state is stored")
+	verbose := flag.Bool("verbose", false, "print verbose logging to stderr")
 	flag.Parse()
 
 	if len(flag.Args()) == 1 && flag.Arg(0) == "version" {
@@ -69,7 +70,7 @@ func main() {
 	}
 
 	if *serveWalrus {
-		if err := createWalletServer(*walrusAddr, *dir); err != nil {
+		if err := createWalletServer(*walrusAddr, *dir, *verbose); err != nil {
 			log.Fatalln("Couldn't initialize walrus server:", err)
 		}
 		log.Println("Started walrus server at", *walrusAddr)
@@ -81,7 +82,7 @@ func main() {
 		}
 	}
 	if *serveShard {
-		if err := createShardServer(*shardAddr, *dir); err != nil {
+		if err := createShardServer(*shardAddr, *dir, *verbose); err != nil {
 			log.Fatalln("Couldn't initialize shard server:", err)
 		}
 		log.Println("Started shard server at", *shardAddr)
@@ -100,7 +101,7 @@ func main() {
 	}
 
 	log.Printf("Listening on %v...", *apiAddr)
-	log.Fatal(http.ListenAndServe(*apiAddr, handlers.LoggingHandler(os.Stderr, handlers.CompressHandler(srv))))
+	log.Fatal(http.ListenAndServe(*apiAddr, loggingHandler(*verbose, handlers.CompressHandler(srv))))
 }
 
 // global vars to make it easier to compose createShardServer and createWalletServer
@@ -110,7 +111,7 @@ var (
 	cs modules.ConsensusSet
 )
 
-func createShardServer(addr, dir string) (err error) {
+func createShardServer(addr, dir string, verbose bool) (err error) {
 	if g == nil {
 		g, err = gateway.New(":9381", true, filepath.Join(dir, "gateway"))
 		if err != nil {
@@ -135,11 +136,11 @@ func createShardServer(addr, dir string) (err error) {
 	if err != nil {
 		return err
 	}
-	go http.Serve(l, handlers.LoggingHandler(os.Stderr, handlers.CompressHandler(shard.NewServer(r))))
+	go http.Serve(l, loggingHandler(verbose, handlers.CompressHandler(shard.NewServer(r))))
 	return nil
 }
 
-func createWalletServer(addr, dir string) (err error) {
+func createWalletServer(addr, dir string, verbose bool) (err error) {
 	if g == nil {
 		g, err = gateway.New(":9381", true, filepath.Join(dir, "gateway"))
 		if err != nil {
@@ -170,7 +171,7 @@ func createWalletServer(addr, dir string) (err error) {
 	if err != nil {
 		return err
 	}
-	go http.Serve(l, handlers.LoggingHandler(os.Stderr, handlers.CompressHandler(walrus.NewServer(w, tp))))
+	go http.Serve(l, loggingHandler(verbose, handlers.CompressHandler(walrus.NewServer(w, tp))))
 	return nil
 }
 
@@ -187,4 +188,11 @@ func handleAsyncErr(errCh <-chan error) error {
 		}
 	}()
 	return nil
+}
+
+func loggingHandler(verbose bool, h http.Handler) http.Handler {
+	if !verbose {
+		return h
+	}
+	return handlers.LoggingHandler(os.Stderr, h)
 }
