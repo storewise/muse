@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ed25519"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -39,71 +38,14 @@ func writeJSON(w http.ResponseWriter, v interface{}) {
 }
 
 type server struct {
-	contracts []Contract
-	hostSets  map[string][]hostdb.HostPublicKey
-	dir       string
+	hostSets map[string][]hostdb.HostPublicKey
+	dir      string
 
 	wallet proto.Wallet
 	tpool  proto.TransactionPool
 	shard  *shard.Client
 	mu     sync.Mutex
 	utxoMu sync.Mutex // separate mutex for utxos, preventing reuse
-}
-
-func (s *server) saveContract(c Contract) error {
-	path := filepath.Join(s.dir, fmt.Sprintf("%s-%x.contract", c.HostKey.ShortKey(), c.ID[:4]))
-	js, _ := json.MarshalIndent(c, "", "  ")
-	return ioutil.WriteFile(path, js, 0660)
-}
-
-func (s *server) handleContracts(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-		return
-	}
-
-	var contracts responseContracts
-	if setName := req.FormValue("hostset"); setName != "" {
-		s.mu.Lock()
-		hostKeys, ok := s.hostSets[setName]
-		if !ok {
-			s.mu.Unlock()
-			http.Error(w, "No record of that host set", http.StatusBadRequest)
-			return
-		}
-		// take most recent contract for each host
-		set := make(map[hostdb.HostPublicKey]Contract)
-		for _, hostKey := range hostKeys {
-			set[hostKey] = Contract{}
-		}
-		for _, c := range s.contracts {
-			if d, ok := set[c.HostKey]; ok && c.EndHeight > d.EndHeight {
-				set[c.HostKey] = c
-			}
-		}
-		contracts = make([]Contract, 0, len(set))
-		for _, c := range set {
-			if c.RenterKey != nil {
-				contracts = append(contracts, c)
-			}
-		}
-		s.mu.Unlock()
-	} else {
-		s.mu.Lock()
-		contracts = append([]Contract(nil), s.contracts...)
-		s.mu.Unlock()
-	}
-
-	// fill in addresses
-	for i := range contracts {
-		addr, err := s.shard.ResolveHostKey(contracts[i].HostKey)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		contracts[i].HostAddress = addr
-	}
-	writeJSON(w, contracts)
 }
 
 func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
@@ -165,15 +107,6 @@ func (s *server) handleForm(w http.ResponseWriter, req *http.Request) {
 		HostAddress: host.NetAddress,
 		EndHeight:   rf.EndHeight,
 	}
-	log.Println("storing a contract:", rf.HostKey, time.Since(start))
-	s.mu.Lock()
-	s.contracts = append(s.contracts, c)
-	s.mu.Unlock()
-	err = s.saveContract(c)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	writeJSON(w, c)
 	log.Println("forming a contract finishes:", rf.HostKey, time.Since(start))
 }
@@ -187,22 +120,6 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 	if err := json.NewDecoder(req.Body).Decode(&rf); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
-	}
-	if rf.HostKey == "" || rf.RenterKey == nil {
-		var old Contract
-		s.mu.Lock()
-		for _, old = range s.contracts {
-			if old.ID == rf.ID {
-				break
-			}
-		}
-		s.mu.Unlock()
-		if old.ID != rf.ID {
-			http.Error(w, "no record of that contract", http.StatusBadRequest)
-			return
-		}
-		rf.HostKey = old.HostKey
-		rf.RenterKey = old.RenterKey
 	}
 
 	start := time.Now()
@@ -244,15 +161,6 @@ func (s *server) handleRenew(w http.ResponseWriter, req *http.Request) {
 		},
 		HostAddress: rf.Settings.NetAddress,
 		EndHeight:   rf.EndHeight,
-	}
-	log.Println("storing a contract:", rf.HostKey, time.Since(start))
-	s.mu.Lock()
-	s.contracts = append(s.contracts, c)
-	s.mu.Unlock()
-	err = s.saveContract(c)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 	writeJSON(w, c)
 	log.Println("renewing a contract finishes:", rf.HostKey, time.Since(start))
@@ -371,28 +279,7 @@ func NewServer(dir string, wallet proto.Wallet, tpool proto.TransactionPool, sha
 		}
 	}
 
-	// load all contracts
-	infos, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-	for _, info := range infos {
-		if filepath.Ext(info.Name()) != ".contract" {
-			continue
-		}
-		js, err := ioutil.ReadFile(filepath.Join(dir, info.Name()))
-		if err != nil {
-			return nil, err
-		}
-		var c Contract
-		if err := json.Unmarshal(js, &c); err != nil {
-			return nil, err
-		}
-		srv.contracts = append(srv.contracts, c)
-	}
-
 	mux := http.NewServeMux()
-	mux.HandleFunc("/contracts", srv.handleContracts)
 	mux.HandleFunc("/form", srv.handleForm)
 	mux.HandleFunc("/renew", srv.handleRenew)
 	mux.HandleFunc("/hostsets/", srv.handleHostSets)

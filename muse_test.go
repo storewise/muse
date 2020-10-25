@@ -1,7 +1,6 @@
 package muse
 
 import (
-	"context"
 	"crypto/ed25519"
 	"encoding/json"
 	"io/ioutil"
@@ -90,11 +89,6 @@ func TestServer(t *testing.T) {
 
 	// test contract formation
 	c := NewClient("http://" + l.Addr().String())
-	if contracts, err := c.AllContracts(); err != nil {
-		t.Fatal(err)
-	} else if len(contracts) != 0 {
-		t.Fatal(err)
-	}
 
 	currentHeight, err := c.SHARD().ChainHeight()
 	if err != nil {
@@ -113,23 +107,14 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if contracts, err := c.AllContracts(); err != nil {
-		t.Fatal(err)
-	} else if len(contracts) != 1 || contracts[0].ID != contract.ID {
-		t.Fatal("wrong contracts:", contracts)
-	}
+
 	// test contract renewal
-	newContract, err := c.Renew(&hostdb.ScannedHost{
+	_, err = c.Renew(&hostdb.ScannedHost{
 		HostSettings: settings,
 		PublicKey:    host.PublicKey(),
 	}, &contract.Contract, types.ZeroCurrency, currentHeight, currentHeight+2)
 	if err != nil {
 		t.Fatal(err)
-	}
-	if contracts, err := c.AllContracts(); err != nil {
-		t.Fatal(err)
-	} else if len(contracts) != 2 || contracts[1].ID != newContract.ID {
-		t.Fatal("wrong contracts:", contracts)
 	}
 
 	// test host sets
@@ -145,21 +130,6 @@ func TestServer(t *testing.T) {
 		t.Fatal(err)
 	} else if len(set) != 1 || set[0] != host.PublicKey() {
 		t.Fatal("wrong host set:", set)
-	}
-	if contracts, err := c.Contracts("foo"); err != nil {
-		t.Fatal(err)
-	} else if len(contracts) != 1 || contracts[0].ID != newContract.ID {
-		t.Fatal("wrong contracts:", contracts)
-	}
-
-	// test context cancellation
-	ctx, cancel := context.WithCancel(context.Background())
-	if _, err := c.WithContext(ctx).AllContracts(); err != nil {
-		t.Fatal("should not fail with uncancelled context:", err)
-	}
-	cancel()
-	if _, err := c.WithContext(ctx).AllContracts(); err == nil {
-		t.Fatal("should fail with cancelled context")
 	}
 }
 
