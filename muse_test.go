@@ -11,16 +11,16 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-	"lukechampine.com/frand"
-	"lukechampine.com/shard"
-	"lukechampine.com/us/ed25519hash"
-	"lukechampine.com/us/hostdb"
-	"lukechampine.com/us/renterhost"
-
 	"gitlab.com/NebulousLabs/Sia/crypto"
 	"gitlab.com/NebulousLabs/Sia/encoding"
 	"gitlab.com/NebulousLabs/Sia/modules"
 	"gitlab.com/NebulousLabs/Sia/types"
+	"lukechampine.com/frand"
+	"lukechampine.com/shard"
+	"lukechampine.com/us/ed25519hash"
+	"lukechampine.com/us/ghost"
+	"lukechampine.com/us/hostdb"
+	"lukechampine.com/us/renterhost"
 )
 
 type mockCS struct{}
@@ -44,19 +44,6 @@ func (p *memPersist) Load(data *shard.PersistData) error {
 	*data = p.PersistData
 	return nil
 }
-
-type stubWallet struct{}
-
-func (stubWallet) NewWalletAddress() (uh types.UnlockHash, err error)                       { return }
-func (stubWallet) SignTransaction(*types.Transaction, []crypto.Hash) (err error)            { return }
-func (stubWallet) UnspentOutputs(bool) (us []modules.UnspentOutput, err error)              { return }
-func (stubWallet) UnconfirmedParents(types.Transaction) (ps []types.Transaction, err error) { return }
-func (stubWallet) UnlockConditions(types.UnlockHash) (uc types.UnlockConditions, err error) { return }
-
-type stubTpool struct{}
-
-func (stubTpool) AcceptTransactionSet([]types.Transaction) (err error) { return }
-func (stubTpool) FeeEstimate() (min, max types.Currency, err error)    { return }
 
 func startSHARD(hpk hostdb.HostPublicKey, ann []byte) (string, func() error) {
 	l, err := net.Listen("tcp", ":0")
@@ -91,7 +78,7 @@ func TestServer(t *testing.T) {
 	// create the muse server
 	dir, _ := ioutil.TempDir("", t.Name())
 	defer os.RemoveAll(dir)
-	srv, err := NewServer(dir, stubWallet{}, stubTpool{}, shardAddr)
+	srv, err := NewServer(dir, ghost.StubWallet{}, ghost.StubTpool{}, shardAddr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -119,7 +106,10 @@ func TestServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	contract, err := c.Form(host.PublicKey(), types.ZeroCurrency, currentHeight, currentHeight+1, settings)
+	contract, err := c.Form(&hostdb.ScannedHost{
+		HostSettings: settings,
+		PublicKey:    host.PublicKey(),
+	}, types.ZeroCurrency, currentHeight, currentHeight+1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +119,10 @@ func TestServer(t *testing.T) {
 		t.Fatal("wrong contracts:", contracts)
 	}
 	// test contract renewal
-	newContract, err := c.Renew(contract.ID, types.ZeroCurrency, currentHeight, currentHeight+2, settings)
+	newContract, err := c.Renew(&hostdb.ScannedHost{
+		HostSettings: settings,
+		PublicKey:    host.PublicKey(),
+	}, &contract.Contract, types.ZeroCurrency, currentHeight, currentHeight+2)
 	if err != nil {
 		t.Fatal(err)
 	}
