@@ -140,6 +140,14 @@ func (c *Client) Renew(host *hostdb.ScannedHost, old *renter.Contract, funds typ
 	return
 }
 
+// Delete removes the record of a contract from the server. The contract itself
+// is not revised or otherwise affected in any way. In general, this method
+// should only be used on contracts that have expired and are no longer needed.
+func (c *Client) Delete(id types.FileContractID) (err error) {
+	err = c.post("/delete/"+id.String(), nil, nil)
+	return
+}
+
 // HostSets returns the current list of host sets.
 func (c *Client) HostSets() (hs []string, err error) {
 	err = c.get("/hostsets/", &hs)
