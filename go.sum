@@ -112,8 +112,8 @@ github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnIn
 github.com/spf13/viper v1.4.0/go.mod h1:PTJ7Z/lr49W6bUbkmS1V3by4uWynFiR9p7+dSq/yZzE=
 github.com/storewise/sia-errors v0.0.0-20201017234534-617267505fae h1:+r+Nyxa0Robx7dOwEK0YgxCATr/QYSPZbRhmMZSR2ws=
 github.com/storewise/sia-errors v0.0.0-20201017234534-617267505fae/go.mod h1:wQIN4N4bv7cBmYiboASwGOX3L9p8+L59OifIAxt/DhI=
-github.com/storewise/us v0.18.4-0.20210120023529-a68fb4b0d6a5 h1:5pO8OvLPezTZFe+2Wkx4OlDh+5NXBqfFcTM8aJP9eww=
-github.com/storewise/us v0.18.4-0.20210120023529-a68fb4b0d6a5/go.mod h1:YYWbiIMVPohhOdUgxzDiXW3gvH/2ZySWsGjqFeuKXiQ=
+github.com/storewise/us v0.18.4-0.20210201204520-65324afd1bcf h1:Acs7REYirMGD6nFssQCzlKeQc+cZbT7FoA6l3IGV0TE=
+github.com/storewise/us v0.18.4-0.20210201204520-65324afd1bcf/go.mod h1:YYWbiIMVPohhOdUgxzDiXW3gvH/2ZySWsGjqFeuKXiQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=

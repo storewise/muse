@@ -19,5 +19,5 @@ require (
 
 replace (
 	gitlab.com/NebulousLabs/errors => github.com/storewise/sia-errors v0.0.0-20201017234534-617267505fae
-	lukechampine.com/us => github.com/storewise/us v0.18.4-0.20210120023529-a68fb4b0d6a5
+	lukechampine.com/us => github.com/storewise/us v0.18.4-0.20210201204520-65324afd1bcf
 )
