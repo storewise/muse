@@ -6,10 +6,10 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/gorilla/handlers v1.5.1
 	github.com/pkg/errors v0.9.1
-	gitlab.com/NebulousLabs/Sia v1.5.0
+	gitlab.com/NebulousLabs/Sia v1.5.4
 	gitlab.com/NebulousLabs/encoding v0.0.0-20200604091946-456c3dc907fe
 	go.uber.org/multierr v1.6.0
-	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
+	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	lukechampine.com/flagg v1.1.1
 	lukechampine.com/frand v1.3.0
 	lukechampine.com/shard v0.3.5
