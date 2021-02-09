@@ -133,7 +133,6 @@ github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/xtaci/smux v1.3.3 h1:+vnzZHTLGHrj+LzUZEkKmvu4KkG7fj4jwMPqhawvErg=
 github.com/xtaci/smux v1.3.3/go.mod h1:f+nYm6SpuHMy/SH0zpbvAFHT1QoMcgLOsWcFip5KfPw=
-gitlab.com/NebulousLabs/Sia v1.5.0/go.mod h1:dcWW1yClYDu/v10Q/ujNX290kg9WrnU2/sZere4IRP4=
 gitlab.com/NebulousLabs/Sia v1.5.4 h1:7+j8Z5BZLPn/LGF0dCODwr1Nq+AYD5cOjopK2PhYTew=
 gitlab.com/NebulousLabs/Sia v1.5.4/go.mod h1:NN77/QIB1opjhFQ9ZxPKg4HqRPUQLiu6YXBHRIyRR1g=
 gitlab.com/NebulousLabs/bolt v1.4.4 h1:3UhpR2qtHs87dJBE3CIzhw48GYSoUUNByJmic0cbu1w=
@@ -159,7 +158,6 @@ gitlab.com/NebulousLabs/monitor v0.0.0-20191205095550-2b0fd3e1012a h1:fs891phmYZ
 gitlab.com/NebulousLabs/monitor v0.0.0-20191205095550-2b0fd3e1012a/go.mod h1:QxXtb5hIp2xQkfb+lzBDIqQIGEj22U7AkYCXO3hkhqc=
 gitlab.com/NebulousLabs/persist v0.0.0-20200605115618-007e5e23d877 h1:BGJ+na/hpeAV6WR8Pys9bJM2ynEwKmT6+qgF8pn01fM=
 gitlab.com/NebulousLabs/persist v0.0.0-20200605115618-007e5e23d877/go.mod h1:KT2SgNX75xjMIQdDi3Rf3tcDWsX/D289R65Ss/7lKBg=
-gitlab.com/NebulousLabs/ratelimit v0.0.0-20200703092634-24a64284c0ec/go.mod h1:hvNy5sMP9gGrNQ7kNgb+vWuiPptqTk4W45bQbbT/vmg=
 gitlab.com/NebulousLabs/ratelimit v0.0.0-20200811080431-99b8f0768b2e h1:sMZdmPFduUilFk8Ed1Ya/DP0gVfUbGhLlNtLG2tONYk=
 gitlab.com/NebulousLabs/ratelimit v0.0.0-20200811080431-99b8f0768b2e/go.mod h1:HVrehlTxX2hYjsrL1k0WK43OZ0NGZfGvqzPL+n0/zrM=
 gitlab.com/NebulousLabs/siamux v0.0.0-20200723083235-f2c35a421446/go.mod h1:B0RyynPElUG2Y2CAVIIRriIqR9qht2I+nDisi3gfKn0=
@@ -188,7 +186,6 @@ golang.org/x/crypto v0.0.0-20180904163835-0709b304e793/go.mod h1:6SG95UA2DQfeDnf
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20191105034135-c7e5f84aec59/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
-golang.org/x/crypto v0.0.0-20191107222254-f4817d981bb6/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200109152110-61a87790db17/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200117160349-530e935923ad/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
@@ -260,7 +257,7 @@ lukechampine.com/flagg v1.1.1 h1:jB5oL4D5zSUrzm5og6dDEi5pnrTF1poKfC7KE1lLsqc=
 lukechampine.com/flagg v1.1.1/go.mod h1:a9ZuZu5LSPXELWSJrabRD00ort+lDXSOQu34xWgEoDI=
 lukechampine.com/frand v1.3.0 h1:HFLrwEHr78+EqAfyp8OChgEzdYCVZzzj6Y+cGDQRhaI=
 lukechampine.com/frand v1.3.0/go.mod h1:4S/TM2ZgrKejMcKMbeLjISpJMO+/eZ1zu3vYX9dtj3s=
-lukechampine.com/shard v0.3.5 h1:PDkN7xYj9nMcmcUltajd2Ef6oHqwNwTcSBe6KpUl4KY=
-lukechampine.com/shard v0.3.5/go.mod h1:bSpEj37gP80HXyrQAVqhJDbHLvD50qIy0DuH5H5usRE=
+lukechampine.com/shard v0.3.6 h1:SnpMbSpLcM2PFFS6ihtbXpSy4/cnzKAPruY41nJ9Nm0=
+lukechampine.com/shard v0.3.6/go.mod h1:+3D6J6AQOJt5Xh7aL6e2Qbuhx5kj0CdmHuaSqj3jOuA=
 lukechampine.com/walrus v0.10.4 h1:8WwHJNNWJlD+cWZ2lnHFOBXerzZlOFA5Hw0gdzLHLiE=
 lukechampine.com/walrus v0.10.4/go.mod h1:DkHTPf0B3AhbqNX5ae3+PP9TjTTcIFjuZvI2REth97g=
