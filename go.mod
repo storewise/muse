@@ -12,7 +12,7 @@ require (
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf
 	lukechampine.com/flagg v1.1.1
 	lukechampine.com/frand v1.3.0
-	lukechampine.com/shard v0.3.6
+	lukechampine.com/shard v0.3.7-0.20210210005640-d271a1d63374
 	lukechampine.com/us v0.19.1
 	lukechampine.com/walrus v0.10.4
 )
