@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
-  go: circleci/go@1.4.0
-  docker: circleci/docker@1.4.0
+  go: circleci/go@1.6.0
+  docker: circleci/docker@1.5.0
 jobs:
   build:
     executor:
@@ -35,8 +35,6 @@ workflows:
           image: storewise/muse/muse
           dockerfile: build/Dockerfile
           registry: ghcr.io
-          docker-username: GITHUB_USERNAME
-          docker-password: GITHUB_ACCESS_TOKEN
           tag: $CIRCLE_TAG
           before_build:
             - attach_workspace:
