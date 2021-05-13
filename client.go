@@ -56,11 +56,7 @@ func (c *Client) req(method string, route string, data, resp interface{}) (err e
 	if err != nil {
 		return err
 	}
-	defer func() {
-		if e := r.Body.Close(); e != nil {
-			err = multierr.Append(err, e)
-		}
-	}()
+	defer multierr.AppendInvoke(&err, multierr.Close(r.Body))
 	if r.StatusCode != 200 {
 		err, _ := ioutil.ReadAll(r.Body)
 		return NewError(strings.TrimSpace(string(err)))
