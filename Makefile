@@ -9,6 +9,10 @@ sgr0 := $(shell tput sgr0)
 all: bin/muse bin/musec
 	@
 
+# static is like all, but for static binaries
+static:
+	go install -ldflags "$(ldflags) -s -w -extldflags='-static'" -tags='timetzdata' ./cmd/...
+
 # dev builds a binary with dev constants
 dev:
 	go install -ldflags "$(LD_FLAGS)" -tags='dev' ./cmd/...
@@ -38,4 +42,4 @@ build: bin/muse bin/musec
 clean:
 	@rm -rf bin/*
 
-.PHONY: all dev test test-long bench lint build clean
+.PHONY: all static dev test test-long bench lint build clean

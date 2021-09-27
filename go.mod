@@ -6,18 +6,15 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/gorilla/handlers v1.5.1
 	github.com/pkg/errors v0.9.1
-	gitlab.com/NebulousLabs/Sia v1.5.4
 	gitlab.com/NebulousLabs/encoding v0.0.0-20200604091946-456c3dc907fe
+	go.sia.tech/siad v1.5.7
 	go.uber.org/multierr v1.7.0
-	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf
+	golang.org/x/term v0.0.0-20210421210424-b80969c67360
 	lukechampine.com/flagg v1.1.1
-	lukechampine.com/frand v1.3.0
-	lukechampine.com/shard v0.3.7
-	lukechampine.com/us v0.19.1
-	lukechampine.com/walrus v0.10.6
+	lukechampine.com/frand v1.4.2
+	lukechampine.com/shard v0.3.9
+	lukechampine.com/us v0.19.4
+	lukechampine.com/walrus v0.10.8
 )
 
-replace (
-	gitlab.com/NebulousLabs/errors => github.com/storewise/sia-errors v0.0.0-20201017234534-617267505fae
-	lukechampine.com/us => github.com/storewise/us v0.19.2-0.20210512235733-5ca355f92d9a
-)
+replace gitlab.com/NebulousLabs/errors => github.com/storewise/sia-errors v0.0.0-20201017234534-617267505fae

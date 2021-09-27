@@ -10,14 +10,13 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-	"gitlab.com/NebulousLabs/Sia/crypto"
-	"gitlab.com/NebulousLabs/Sia/modules"
-	"gitlab.com/NebulousLabs/Sia/types"
 	"gitlab.com/NebulousLabs/encoding"
+	"go.sia.tech/siad/crypto"
+	"go.sia.tech/siad/modules"
+	"go.sia.tech/siad/types"
 	"lukechampine.com/frand"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/ed25519hash"
-	"lukechampine.com/us/ghost"
 	"lukechampine.com/us/hostdb"
 	"lukechampine.com/us/renterhost"
 )
@@ -43,6 +42,23 @@ func (p *memPersist) Load(data *shard.PersistData) error {
 	*data = p.PersistData
 	return nil
 }
+
+type stubWallet struct{}
+
+func (stubWallet) Address() (_ types.UnlockHash, _ error) { return }
+func (stubWallet) FundTransaction(*types.Transaction, types.Currency) ([]crypto.Hash, func(), error) {
+	return nil, func() {}, nil
+}
+func (stubWallet) SignTransaction(txn *types.Transaction, toSign []crypto.Hash) error {
+	txn.TransactionSignatures = append(txn.TransactionSignatures, make([]types.TransactionSignature, len(toSign))...)
+	return nil
+}
+
+type stubTpool struct{}
+
+func (stubTpool) AcceptTransactionSet([]types.Transaction) (_ error)                    { return }
+func (stubTpool) UnconfirmedParents(types.Transaction) (_ []types.Transaction, _ error) { return }
+func (stubTpool) FeeEstimate() (_, _ types.Currency, _ error)                           { return }
 
 func startSHARD(hpk hostdb.HostPublicKey, ann []byte) (string, func() error) {
 	l, err := net.Listen("tcp", ":0")
@@ -77,7 +93,7 @@ func TestServer(t *testing.T) {
 	// create the muse server
 	dir, _ := ioutil.TempDir("", t.Name())
 	defer os.RemoveAll(dir)
-	srv, err := NewServer(dir, ghost.StubWallet{}, ghost.StubTpool{}, shardAddr)
+	srv, err := NewServer(dir, stubWallet{}, stubTpool{}, shardAddr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +239,9 @@ func (h *Host) handleConn(conn net.Conn) error {
 		if errors.Cause(err) == renterhost.ErrRenterClosed {
 			return nil
 		}
-		rpcs[id](s)
+		if handler, ok := rpcs[id]; ok {
+			handler(s)
+		}
 	}
 }
 

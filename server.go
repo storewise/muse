@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/NebulousLabs/Sia/modules"
+	"go.sia.tech/siad/modules"
 	"lukechampine.com/frand"
 	"lukechampine.com/shard"
 	"lukechampine.com/us/hostdb"
